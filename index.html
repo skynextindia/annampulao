@@ -41,6 +41,10 @@
         <span class="nav-icon">🍽️</span>
         <span class="nav-label">Tables</span>
       </button>
+      <button class="nav-tab" data-tab="menu" id="tabMenuBtn">
+        <span class="nav-icon">🍲</span>
+        <span class="nav-label">Menu Items</span>
+      </button>
       <button class="nav-tab" data-tab="reports" id="tabReportsBtn">
         <span class="nav-icon">📊</span>
         <span class="nav-label">Daily Sales</span>
@@ -74,7 +78,19 @@
     
     <!-- ================= SECTION 1: POS BILLING ================= -->
     <section class="tab-pane active" id="panePos">
-      <div class="pos-layout">
+      <!-- Mobile POS Segmented Switcher (Visible on <= 960px) -->
+      <div class="pos-mobile-nav" id="posMobileNav">
+        <button class="pos-mob-tab active" id="mobShowMenuBtn" type="button">
+          <span class="icon">🍽️</span> Menu Dishes
+        </button>
+        <button class="pos-mob-tab" id="mobShowCartBtn" type="button">
+          <span class="icon">🧾</span> Current Bill 
+          <span class="mob-cart-badge" id="mobCartBadge">0</span>
+          <span class="mob-cart-total" id="mobCartTotal">₹0.00</span>
+        </button>
+      </div>
+
+      <div class="pos-layout" id="posLayout">
         
         <!-- Left: Menu & Catalog Selection -->
         <div class="menu-column">
@@ -127,6 +143,14 @@
         <!-- Right: Real-time Touch Cart & Billing Desk -->
         <div class="cart-column">
           <div class="cart-card">
+            <!-- Mobile Back Bar -->
+            <div class="mob-cart-top-bar" id="mobCartTopBar">
+              <button class="mob-back-to-menu-btn" id="mobBackToMenuBtn" type="button">
+                ← Add More Dishes
+              </button>
+              <span class="mob-cart-top-title">Table Bill Checkout</span>
+            </div>
+
             <!-- Cart Header / Order Type -->
             <div class="cart-header">
               <div class="order-type-selector">
@@ -261,6 +285,21 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Mobile Floating Bill Bar (Appears when cart has items on mobile) -->
+      <div class="mobile-floating-bill-bar" id="mobileFloatingBillBar">
+        <div class="mfb-info">
+          <span class="mfb-icon">🛒</span>
+          <div class="mfb-text">
+            <span class="mfb-count" id="mfbCount">0 items</span>
+            <span class="mfb-dot">•</span>
+            <span class="mfb-total" id="mfbTotal">₹0.00</span>
+          </div>
+        </div>
+        <button class="mfb-action-btn" id="mfbActionBtn" type="button">
+          <span>View Bill & Print 🖨️ ➔</span>
+        </button>
       </div>
     </section>
 
@@ -505,6 +544,44 @@
             <button class="btn-danger" id="resetSalesDataBtn">⚠️ Reset Today's Demo Sales</button>
           </div>
         </div>
+    <!-- ================= SECTION 6: MENU ITEMS & PRICING ================= -->
+    <section class="tab-pane" id="paneMenu">
+      <div class="menu-mgmt-layout">
+        <div class="menu-mgmt-header-bar">
+          <div>
+            <h2>🍲 Dish Catalog & Price Editor (मेनू व्यवस्थापन)</h2>
+            <p class="section-subtext">Add new dishes, edit prices, change photos & categories. Changes update live POS billing instantly.</p>
+          </div>
+          <div class="menu-mgmt-actions">
+            <button class="btn-primary" id="openAddDishModalBtn" type="button">
+              ➕ Add New Dish
+            </button>
+            <button class="btn-secondary" id="resetMenuToDefaultBtn" type="button">
+              🔄 Reset Default Menu
+            </button>
+          </div>
+        </div>
+
+        <!-- Menu Filter and Search Controls -->
+        <div class="menu-mgmt-controls">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="menuMgmtSearchInput" placeholder="Filter dishes by name or category...">
+            <button class="clear-search-btn" id="clearMenuMgmtSearchBtn" type="button">✕</button>
+          </div>
+          <div class="category-carousel" id="menuMgmtCatFilter">
+            <button class="cat-pill active" data-mgmt-cat="all" type="button">🌟 All (<span id="countMgmtAll">0</span>)</button>
+            <button class="cat-pill" data-mgmt-cat="pulao" type="button">🍛 Pulao (<span id="countMgmtPulao">0</span>)</button>
+            <button class="cat-pill" data-mgmt-cat="starters" type="button">🍗 Starters (<span id="countMgmtStarters">0</span>)</button>
+            <button class="cat-pill" data-mgmt-cat="thali" type="button">🍱 Thali (<span id="countMgmtThali">0</span>)</button>
+            <button class="cat-pill" data-mgmt-cat="paratha" type="button">🫓 Breads & Drinks (<span id="countMgmtParatha">0</span>)</button>
+          </div>
+        </div>
+
+        <!-- Dish Cards Grid -->
+        <div class="menu-mgmt-grid" id="menuMgmtGrid">
+          <!-- Populated dynamically via JS -->
+        </div>
       </div>
     </section>
 
@@ -609,7 +686,100 @@
     </div>
   </div>
 
-  <!-- 4. TOAST NOTIFICATION -->
+  <!-- 4. EDIT / ADD MENU DISH MODAL -->
+  <div class="modal-overlay" id="menuEditModal">
+    <div class="menu-modal-card">
+      <div class="menu-modal-header">
+        <div class="mm-title">
+          <span class="mm-icon">🍛</span>
+          <span id="menuModalTitle">Edit Dish (पदार्थ संपादन)</span>
+        </div>
+        <button class="close-modal-btn" id="closeMenuModalBtn" type="button">✕</button>
+      </div>
+
+      <form id="menuDishForm" class="menu-modal-form">
+        <input type="hidden" id="editDishId" value="">
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="editDishNameMr">Marathi Name (मराठी नाव): *</label>
+            <input type="text" id="editDishNameMr" placeholder="उदा. अन्नम मटण पुलाव" required>
+          </div>
+          <div class="form-group">
+            <label for="editDishNameEn">English Name: *</label>
+            <input type="text" id="editDishNameEn" placeholder="e.g. Annam Mutton Pulav" required>
+          </div>
+        </div>
+
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label for="editDishPrice">Price (दर ₹): *</label>
+            <input type="number" id="editDishPrice" min="1" max="9999" placeholder="270" required>
+          </div>
+          <div class="form-group">
+            <label for="editDishCategory">Category (प्रकार): *</label>
+            <select id="editDishCategory">
+              <option value="pulao">🍛 अन्नम पुलाव (Pulao)</option>
+              <option value="starters">🍗 फ्राय व सूप (Starters)</option>
+              <option value="thali">🍱 थाळी / Meals (Thali)</option>
+              <option value="paratha">🫓 पराठा व सोलकडी (Breads/Drinks)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editDishDiet">Diet Type: *</label>
+            <select id="editDishDiet">
+              <option value="non-veg">🔴 Non-Veg (मांसाहारी)</option>
+              <option value="veg">🟢 Veg (शाकाहारी)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="editDishTiming">Timing / Tag (Optional):</label>
+            <input type="text" id="editDishTiming" placeholder="e.g. 11:00 AM - 2:30 PM, Chef Special, Popular">
+          </div>
+          <div class="form-group">
+            <label for="editDishImagePreset">Preset Dish Photo:</label>
+            <select id="editDishImagePreset">
+              <option value="assets/images/mutton_pulao.jpg">🍛 Mutton / Chicken Pulao</option>
+              <option value="assets/images/starters_fry.jpg">🍗 Starters Fry (Mutton Chops / Chicken 65)</option>
+              <option value="assets/images/chicken_thali.jpg">🍱 Annam Special Thali</option>
+              <option value="assets/images/solkadhi_paratha.jpg">🫓 Paratha & Solkadhi</option>
+              <option value="custom">🌐 Custom Image URL / Path</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editDishImageUrl">Image Path / URL: *</label>
+          <input type="text" id="editDishImageUrl" value="assets/images/mutton_pulao.jpg" required>
+        </div>
+
+        <div class="dish-preview-row">
+          <div class="dish-preview-thumb">
+            <img id="dishEditPreviewImg" src="assets/images/mutton_pulao.jpg" alt="Dish Preview" onerror="this.src='assets/images/mutton_pulao.jpg'">
+          </div>
+          <div class="dish-preview-meta">
+            <span class="preview-tag">Image Preview</span>
+            <span class="preview-hint">This image will appear on POS billing tiles cleanly with no text overlap.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="editDishDesc">Description (वर्णन):</label>
+          <input type="text" id="editDishDesc" placeholder="Brief note on spices, gravy, or pieces">
+        </div>
+
+        <div class="menu-modal-footer">
+          <button type="button" class="btn-secondary" id="cancelMenuModalBtn">Cancel</button>
+          <button type="submit" class="btn-primary" id="saveDishBtn">💾 Save Dish (सेव्ह करा)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. TOAST NOTIFICATION -->
   <div class="toast-notification" id="toastNotice">
     <span class="toast-icon" id="toastIcon">✨</span>
     <span class="toast-msg" id="toastMsg">Action completed successfully</span>

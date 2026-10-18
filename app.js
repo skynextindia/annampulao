@@ -20,6 +20,10 @@ const AppState = {
   activeCategory: 'all',
   activeDiet: 'all',
   searchQuery: '',
+  menuItems: [], // Loaded dynamically from Storage
+  mgmtCategory: 'all',
+  mgmtSearchQuery: '',
+  mobilePosView: 'menu', // 'menu' | 'cart'
   bluetoothDevice: null,
   bluetoothServer: null,
   bluetoothCharacteristic: null,
@@ -38,7 +42,7 @@ const AppState = {
 };
 
 // ================= AUTHENTIC MENU DATA =================
-const MENU_ITEMS = [
+const DEFAULT_MENU_ITEMS = [
   // PULAO SPECIALS
   {
     id: 'p1',
@@ -71,6 +75,7 @@ const MENU_ITEMS = [
     price: 290,
     category: 'starters',
     diet: 'non-veg',
+    image: 'assets/images/starters_fry.jpg',
     desc: 'Tender marinated mutton chops pan-fried to crisp perfection',
     badge: 'Chef Special'
   },
@@ -81,6 +86,7 @@ const MENU_ITEMS = [
     price: 290,
     category: 'starters',
     diet: 'non-veg',
+    image: 'assets/images/starters_fry.jpg',
     desc: 'Spiced minced mutton gravy tossed with fresh tender liver',
     badge: ''
   },
@@ -91,6 +97,7 @@ const MENU_ITEMS = [
     price: 120,
     category: 'starters',
     diet: 'non-veg',
+    image: 'assets/images/starters_fry.jpg',
     desc: 'Healthy, hot slow-simmered bone broth packed with rich spices',
     badge: 'Hot'
   },
@@ -101,6 +108,7 @@ const MENU_ITEMS = [
     price: 270,
     category: 'starters',
     diet: 'non-veg',
+    image: 'assets/images/starters_fry.jpg',
     desc: 'Crispy fried chicken drumsticks seasoned with authentic red spices',
     badge: ''
   },
@@ -111,6 +119,7 @@ const MENU_ITEMS = [
     price: 180,
     category: 'starters',
     diet: 'non-veg',
+    image: 'assets/images/starters_fry.jpg',
     desc: 'Spicy deep-fried boneless chicken bites with curry leaves & green chilies',
     badge: 'Crispy'
   },
@@ -270,6 +279,31 @@ const Storage = {
     }
   },
 
+  MENU_KEY: 'annam_pulao_menu_v2',
+
+  getMenuItems() {
+    try {
+      const raw = localStorage.getItem(this.MENU_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    this.saveMenuItems(DEFAULT_MENU_ITEMS);
+    return DEFAULT_MENU_ITEMS;
+  },
+
+  saveMenuItems(items) {
+    try {
+      localStorage.setItem(this.MENU_KEY, JSON.stringify(items));
+    } catch (e) {}
+  },
+
+  resetMenu() {
+    localStorage.removeItem(this.MENU_KEY);
+    return this.getMenuItems();
+  },
+
   saveConfig(cfg) {
     localStorage.setItem(this.CONFIG_KEY, JSON.stringify(cfg));
   }
@@ -328,6 +362,50 @@ const DOM = {
   rmPrintRawbtBtn: document.getElementById('rmPrintRawbtBtn'),
   rmSendWaBtn: document.getElementById('rmSendWaBtn'),
   rmPrintBrowserBtn: document.getElementById('rmPrintBrowserBtn'),
+
+  // Mobile POS navigation & Floating bar
+  posLayout: document.getElementById('posLayout'),
+  posMobileNav: document.getElementById('posMobileNav'),
+  mobShowMenuBtn: document.getElementById('mobShowMenuBtn'),
+  mobShowCartBtn: document.getElementById('mobShowCartBtn'),
+  mobCartBadge: document.getElementById('mobCartBadge'),
+  mobCartTotal: document.getElementById('mobCartTotal'),
+  mobBackToMenuBtn: document.getElementById('mobBackToMenuBtn'),
+  mobileFloatingBillBar: document.getElementById('mobileFloatingBillBar'),
+  mfbCount: document.getElementById('mfbCount'),
+  mfbTotal: document.getElementById('mfbTotal'),
+  mfbActionBtn: document.getElementById('mfbActionBtn'),
+
+  // Menu Management
+  openAddDishModalBtn: document.getElementById('openAddDishModalBtn'),
+  resetMenuToDefaultBtn: document.getElementById('resetMenuToDefaultBtn'),
+  menuMgmtSearchInput: document.getElementById('menuMgmtSearchInput'),
+  clearMenuMgmtSearchBtn: document.getElementById('clearMenuMgmtSearchBtn'),
+  menuMgmtCatFilter: document.getElementById('menuMgmtCatFilter'),
+  menuMgmtGrid: document.getElementById('menuMgmtGrid'),
+  countMgmtAll: document.getElementById('countMgmtAll'),
+  countMgmtPulao: document.getElementById('countMgmtPulao'),
+  countMgmtStarters: document.getElementById('countMgmtStarters'),
+  countMgmtThali: document.getElementById('countMgmtThali'),
+  countMgmtParatha: document.getElementById('countMgmtParatha'),
+
+  // Menu Edit Modal
+  menuEditModal: document.getElementById('menuEditModal'),
+  menuModalTitle: document.getElementById('menuModalTitle'),
+  closeMenuModalBtn: document.getElementById('closeMenuModalBtn'),
+  cancelMenuModalBtn: document.getElementById('cancelMenuModalBtn'),
+  menuDishForm: document.getElementById('menuDishForm'),
+  editDishId: document.getElementById('editDishId'),
+  editDishNameMr: document.getElementById('editDishNameMr'),
+  editDishNameEn: document.getElementById('editDishNameEn'),
+  editDishPrice: document.getElementById('editDishPrice'),
+  editDishCategory: document.getElementById('editDishCategory'),
+  editDishDiet: document.getElementById('editDishDiet'),
+  editDishTiming: document.getElementById('editDishTiming'),
+  editDishImagePreset: document.getElementById('editDishImagePreset'),
+  editDishImageUrl: document.getElementById('editDishImageUrl'),
+  dishEditPreviewImg: document.getElementById('dishEditPreviewImg'),
+  editDishDesc: document.getElementById('editDishDesc'),
 
   upiQrModal: document.getElementById('upiQrModal'),
   closeUpiModalBtn: document.getElementById('closeUpiModalBtn'),
@@ -421,7 +499,8 @@ function renderMenuItems() {
   const cat = AppState.activeCategory;
   const diet = AppState.activeDiet;
 
-  const filtered = MENU_ITEMS.filter(item => {
+  const sourceItems = AppState.menuItems && AppState.menuItems.length ? AppState.menuItems : DEFAULT_MENU_ITEMS;
+  const filtered = sourceItems.filter(item => {
     // Category filter
     if (cat !== 'all' && item.category !== cat) return false;
     // Diet filter
@@ -622,6 +701,20 @@ function renderCart() {
   DOM.cartTotalItemsCount.textContent = totalItems;
   DOM.subtotalAmount.textContent = `₹${subtotal.toFixed(2)}`;
   DOM.grandTotalAmount.textContent = `₹${grandTotal.toFixed(2)}`;
+
+  // Update mobile indicators & floating bill bar
+  if (DOM.mobCartBadge) DOM.mobCartBadge.textContent = totalItems;
+  if (DOM.mobCartTotal) DOM.mobCartTotal.textContent = `₹${grandTotal.toFixed(2)}`;
+  if (DOM.mfbCount) DOM.mfbCount.textContent = `${totalItems} ${totalItems === 1 ? 'dish' : 'dishes'}`;
+  if (DOM.mfbTotal) DOM.mfbTotal.textContent = `₹${grandTotal.toFixed(2)}`;
+
+  if (DOM.mobileFloatingBillBar) {
+    if (totalItems > 0 && AppState.mobilePosView !== 'cart') {
+      DOM.mobileFloatingBillBar.classList.add('has-items');
+    } else {
+      DOM.mobileFloatingBillBar.classList.remove('has-items');
+    }
+  }
 
   if (AppState.cart.length === 0) {
     DOM.cartItemsList.innerHTML = '';
@@ -1324,7 +1417,208 @@ function switchTab(targetTabId) {
 
   if (targetTabId === 'orders') renderOrdersHistory();
   if (targetTabId === 'tables') renderTablesFloor();
+  if (targetTabId === 'menu') renderMenuManagement();
   if (targetTabId === 'reports') renderReports();
+}
+
+// ================= MOBILE POS VIEW SWITCHER =================
+function setMobilePosView(view) {
+  AppState.mobilePosView = view;
+  if (!DOM.posLayout) return;
+
+  if (view === 'cart') {
+    DOM.posLayout.classList.add('show-cart-mobile');
+    if (DOM.mobShowCartBtn) DOM.mobShowCartBtn.classList.add('active');
+    if (DOM.mobShowMenuBtn) DOM.mobShowMenuBtn.classList.remove('active');
+    if (DOM.mobileFloatingBillBar) DOM.mobileFloatingBillBar.classList.remove('has-items');
+  } else {
+    DOM.posLayout.classList.remove('show-cart-mobile');
+    if (DOM.mobShowMenuBtn) DOM.mobShowMenuBtn.classList.add('active');
+    if (DOM.mobShowCartBtn) DOM.mobShowCartBtn.classList.remove('active');
+    const { totalItems } = calculateCartTotals();
+    if (totalItems > 0 && DOM.mobileFloatingBillBar) {
+      DOM.mobileFloatingBillBar.classList.add('has-items');
+    }
+  }
+}
+
+// ================= MENU MANAGEMENT (EDITABLE PRICES & DISHES) =================
+function renderMenuManagement() {
+  if (!DOM.menuMgmtGrid) return;
+  DOM.menuMgmtGrid.innerHTML = '';
+
+  const items = AppState.menuItems || [];
+  const cat = AppState.mgmtCategory || 'all';
+  const query = (AppState.mgmtSearchQuery || '').toLowerCase().trim();
+
+  // Update category counts
+  if (DOM.countMgmtAll) DOM.countMgmtAll.textContent = items.length;
+  if (DOM.countMgmtPulao) DOM.countMgmtPulao.textContent = items.filter(i => i.category === 'pulao').length;
+  if (DOM.countMgmtStarters) DOM.countMgmtStarters.textContent = items.filter(i => i.category === 'starters').length;
+  if (DOM.countMgmtThali) DOM.countMgmtThali.textContent = items.filter(i => i.category === 'thali').length;
+  if (DOM.countMgmtParatha) DOM.countMgmtParatha.textContent = items.filter(i => i.category === 'paratha').length;
+
+  const filtered = items.filter(item => {
+    if (cat !== 'all' && item.category !== cat) return false;
+    if (query) {
+      const matchEng = item.name_en.toLowerCase().includes(query);
+      const matchMr = item.name_mr.includes(query);
+      if (!matchEng && !matchMr) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    DOM.menuMgmtGrid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+        <p style="font-size: 28px; margin-bottom: 8px;">🍽️</p>
+        <p style="font-size: 14px; font-weight: 700;">No dishes found</p>
+        <p style="font-size: 11px;">Tap "+ Add New Dish" above to add a dish to the menu.</p>
+      </div>
+    `;
+    return;
+  }
+
+  filtered.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'menu-mgmt-card';
+    const imgSrc = item.image || 'assets/images/mutton_pulao.jpg';
+    const dietBadge = item.diet === 'non-veg'
+      ? `<span class="nv-box"><span class="nv-tri"></span></span>`
+      : `<span class="v-box"><span class="v-dot"></span></span>`;
+
+    card.innerHTML = `
+      <div class="mmc-thumb-wrap">
+        <img class="mmc-thumb" src="${imgSrc}" alt="${item.name_en}" onerror="this.src='assets/images/mutton_pulao.jpg'">
+      </div>
+      <div class="mmc-body">
+        <div>
+          <div class="mmc-title-row">
+            <span class="mmc-name-mr">${item.name_mr}</span>
+            ${dietBadge}
+          </div>
+          <div class="mmc-name-en">${item.name_en}</div>
+          <div class="mmc-meta-row">
+            <span class="mmc-category-tag">${item.category}</span>
+            ${item.timing ? `<span class="mmc-category-tag" style="background:#fee2e2; color:#b91c1c;">${item.timing}</span>` : ''}
+          </div>
+        </div>
+        <div class="mmc-footer-row">
+          <span class="mmc-price">₹${item.price}</span>
+          <div class="mmc-actions">
+            <button class="btn-card-edit" data-id="${item.id}" type="button" title="Edit Price & Details">✏️ Edit</button>
+            <button class="btn-card-del" data-id="${item.id}" type="button" title="Delete Dish">🗑️</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    card.querySelector('.btn-card-edit').addEventListener('click', () => openMenuEditModal(item.id));
+    card.querySelector('.btn-card-del').addEventListener('click', () => deleteMenuDish(item.id));
+    DOM.menuMgmtGrid.appendChild(card);
+  });
+}
+
+function openMenuEditModal(dishId = null) {
+  AudioFX.tap();
+  DOM.menuDishForm.reset();
+
+  if (dishId) {
+    const item = (AppState.menuItems || []).find(i => i.id === dishId);
+    if (!item) return;
+    DOM.menuModalTitle.textContent = `Edit Dish: ${item.name_en}`;
+    DOM.editDishId.value = item.id;
+    DOM.editDishNameMr.value = item.name_mr;
+    DOM.editDishNameEn.value = item.name_en;
+    DOM.editDishPrice.value = item.price;
+    DOM.editDishCategory.value = item.category;
+    DOM.editDishDiet.value = item.diet;
+    DOM.editDishTiming.value = item.timing || '';
+    DOM.editDishDesc.value = item.desc || '';
+    DOM.editDishImageUrl.value = item.image || 'assets/images/mutton_pulao.jpg';
+    DOM.dishEditPreviewImg.src = item.image || 'assets/images/mutton_pulao.jpg';
+  } else {
+    DOM.menuModalTitle.textContent = 'Add New Dish (नवीन पदार्थ)';
+    DOM.editDishId.value = '';
+    DOM.editDishImageUrl.value = 'assets/images/mutton_pulao.jpg';
+    DOM.dishEditPreviewImg.src = 'assets/images/mutton_pulao.jpg';
+  }
+
+  DOM.menuEditModal.classList.add('active');
+}
+
+function closeMenuEditModal() {
+  DOM.menuEditModal.classList.remove('active');
+}
+
+function saveMenuDish() {
+  const id = DOM.editDishId.value.trim();
+  const nameMr = DOM.editDishNameMr.value.trim();
+  const nameEn = DOM.editDishNameEn.value.trim();
+  const price = parseFloat(DOM.editDishPrice.value) || 0;
+  const category = DOM.editDishCategory.value;
+  const diet = DOM.editDishDiet.value;
+  const timing = DOM.editDishTiming.value.trim();
+  const desc = DOM.editDishDesc.value.trim();
+  const image = DOM.editDishImageUrl.value.trim() || 'assets/images/mutton_pulao.jpg';
+
+  if (!nameMr || !nameEn || price <= 0) {
+    alert('Please enter valid Marathi name, English name, and price.');
+    return;
+  }
+
+  let items = AppState.menuItems && AppState.menuItems.length ? [...AppState.menuItems] : [...DEFAULT_MENU_ITEMS];
+
+  if (id) {
+    // Update existing dish
+    const index = items.findIndex(i => i.id === id);
+    if (index !== -1) {
+      items[index] = { ...items[index], name_mr: nameMr, name_en: nameEn, price, category, diet, timing, desc, image };
+      showToast(`Updated "${nameEn}" (₹${price})`, '✅');
+    }
+  } else {
+    // Add new dish
+    const newId = 'dish_' + Date.now();
+    items.push({
+      id: newId,
+      name_mr: nameMr,
+      name_en: nameEn,
+      price,
+      category,
+      diet,
+      timing,
+      desc,
+      image,
+      badge: 'New'
+    });
+    showToast(`Added "${nameEn}" to menu!`, '🎉');
+  }
+
+  AppState.menuItems = items;
+  Storage.saveMenuItems(items);
+  renderMenuItems();
+  renderMenuManagement();
+  closeMenuEditModal();
+}
+
+function deleteMenuDish(id) {
+  const item = (AppState.menuItems || []).find(i => i.id === id);
+  if (!item) return;
+  if (!confirm(`Are you sure you want to delete "${item.name_en}" from the menu?`)) return;
+
+  AppState.menuItems = (AppState.menuItems || []).filter(i => i.id !== id);
+  Storage.saveMenuItems(AppState.menuItems);
+  renderMenuItems();
+  renderMenuManagement();
+  showToast(`Deleted "${item.name_en}"`, '🗑️');
+}
+
+function resetMenuToDefault() {
+  if (!confirm('Reset all menu items and prices back to original defaults? Any custom dishes will be replaced.')) return;
+  AppState.menuItems = Storage.resetMenu();
+  renderMenuItems();
+  renderMenuManagement();
+  showToast('Restored default menu catalog!', '🔄');
 }
 
 // ================= EVENT LISTENERS INITIALIZATION =================
@@ -1654,6 +1948,80 @@ function initEventListeners() {
     renderOrdersHistory();
     showToast('Orders refreshed', '🔄');
   });
+
+  // Mobile POS Dual-Nav Switcher
+  if (DOM.mobShowMenuBtn) {
+    DOM.mobShowMenuBtn.addEventListener('click', () => setMobilePosView('menu'));
+  }
+  if (DOM.mobShowCartBtn) {
+    DOM.mobShowCartBtn.addEventListener('click', () => setMobilePosView('cart'));
+  }
+  if (DOM.mobBackToMenuBtn) {
+    DOM.mobBackToMenuBtn.addEventListener('click', () => setMobilePosView('menu'));
+  }
+  if (DOM.mfbActionBtn) {
+    DOM.mfbActionBtn.addEventListener('click', () => setMobilePosView('cart'));
+  }
+
+  // Menu Management Listeners
+  if (DOM.openAddDishModalBtn) {
+    DOM.openAddDishModalBtn.addEventListener('click', () => openMenuEditModal(null));
+  }
+  if (DOM.resetMenuToDefaultBtn) {
+    DOM.resetMenuToDefaultBtn.addEventListener('click', resetMenuToDefault);
+  }
+  if (DOM.closeMenuModalBtn) {
+    DOM.closeMenuModalBtn.addEventListener('click', closeMenuEditModal);
+  }
+  if (DOM.cancelMenuModalBtn) {
+    DOM.cancelMenuModalBtn.addEventListener('click', closeMenuEditModal);
+  }
+  if (DOM.menuDishForm) {
+    DOM.menuDishForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveMenuDish();
+    });
+  }
+  if (DOM.editDishImagePreset) {
+    DOM.editDishImagePreset.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val !== 'custom') {
+        DOM.editDishImageUrl.value = val;
+        DOM.dishEditPreviewImg.src = val;
+      }
+    });
+  }
+  if (DOM.editDishImageUrl) {
+    DOM.editDishImageUrl.addEventListener('input', (e) => {
+      DOM.dishEditPreviewImg.src = e.target.value.trim() || 'assets/images/mutton_pulao.jpg';
+    });
+  }
+  if (DOM.menuMgmtSearchInput) {
+    DOM.menuMgmtSearchInput.addEventListener('input', (e) => {
+      AppState.mgmtSearchQuery = e.target.value;
+      DOM.clearMenuMgmtSearchBtn.classList.toggle('show', e.target.value.length > 0);
+      renderMenuManagement();
+    });
+  }
+  if (DOM.clearMenuMgmtSearchBtn) {
+    DOM.clearMenuMgmtSearchBtn.addEventListener('click', () => {
+      DOM.menuMgmtSearchInput.value = '';
+      AppState.mgmtSearchQuery = '';
+      DOM.clearMenuMgmtSearchBtn.classList.remove('show');
+      renderMenuManagement();
+    });
+  }
+  if (DOM.menuMgmtCatFilter) {
+    DOM.menuMgmtCatFilter.addEventListener('click', (e) => {
+      const pill = e.target.closest('.cat-pill');
+      if (!pill) return;
+      AudioFX.tap();
+      DOM.menuMgmtCatFilter.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      AppState.mgmtCategory = pill.getAttribute('data-mgmt-cat') || 'all';
+      renderMenuManagement();
+    });
+  }
 }
 
 // ================= APP INITIALIZATION =================
@@ -1701,6 +2069,9 @@ function initApp() {
 
   if (DOM.cfgTableCount) DOM.cfgTableCount.value = AppState.config.tableCount || 8;
   if (DOM.tableCountInput) DOM.tableCountInput.value = AppState.config.tableCount || 8;
+
+  // Load menu items from storage
+  AppState.menuItems = Storage.getMenuItems();
 
   // Start features
   startLiveClock();

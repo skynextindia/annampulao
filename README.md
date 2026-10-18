@@ -43,10 +43,10 @@ Connect your tablet to the same Wi-Fi network and open Chrome:
 
 ---
 
-## 📋 Features Included
-
-* **Branding & Theme:** Matches the Annam Pulao banner with royal maroon, turmeric gold, and leaf green accents.
-* **Full Authentic Menu:** Pulao specials, mutton & chicken starters, morning thalis (11 AM to 2:30 PM), parathas, and solkadhi.
-* **KOT Printing:** 1-tap Kitchen Order Ticket for the chef.
-* **Payment Modes:** Cash, UPI (Dynamic QR code modal for customer scanning), Card, and Khata/Due.
-* **Daily Sales & Closing:** View today's revenue breakdown (Cash vs UPI) and print a consolidated 58mm Day Summary report.
+* **Dual-Mode Mobile & Tablet Responsive POS:** On mobile phones and portrait tablets, avoids squished dual-column crowding with an instant segmented switcher (`[ Menu Dishes ] | [ Current Bill ]`) and a floating sticky bill bar (`🛒 3 items • ₹520 | View Bill & Print ➔`). On desktop/landscape tablets, operates as an enterprise side-by-side POS workstation.
+* **Non-Obscured Tile Standards:** Food tile images feature a guaranteed height with `object-fit: cover; flex-shrink: 0; min-height: 95px`, eliminating image squishing or text area collision on any device.
+* **Editable Menu Catalog & Pricing:** Full menu management tab (`Menu Items`) to edit dish prices (e.g. Mutton Pulao ₹270), update food images via presets or custom URLs, change Marathi/English titles, add new custom dishes, or reset to defaults.
+* **KOT & 58mm Thermal Printing:** 1-tap Kitchen Order Ticket and RawBT customer receipt for handy Metentian/ESC-POS Bluetooth/USB thermal printers.
+* **WhatsApp Billing:** 1-tap itemized receipt sent to customer WhatsApp number via `wa.me`.
+* **Payment Modes & Tables:** Cash, UPI (instant QR generation), Card, and Due with dynamic table count management (T-1 to T-N).
+* **Daily Sales & Closing:** Complete sales dashboard with day-end summary print.
