@@ -1,0 +1,17 @@
+{
+  "name": "Annam Pulao - Hotel Billing Tab POS",
+  "short_name": "Annam Pulao POS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#2c0b07",
+  "theme_color": "#2c0b07",
+  "description": "High-speed Hotel Billing & RawBT 58mm Thermal Printing WebApp for Annam Pulao",
+  "icons": [
+    {
+      "src": "assets/images/mutton_pulao.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

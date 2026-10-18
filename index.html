@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#2c0b07">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Annam Pulao - Hotel Tablet Billing POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- Ambient Background Glow -->
+  <div class="bg-decor"></div>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand-block">
+        <div class="brand-title">ANNAM PULAO <span class="brand-subtitle">अन्नम पुलाव</span></div>
+        <div class="brand-subline">Vijaya Caterers Shital Bharate • 955 23 777 33</div>
+      </div>
+    </div>
+
+    <!-- Center Quick Navigation Tabs -->
+    <nav class="nav-tabs" id="navTabs">
+      <button class="nav-tab active" data-tab="pos" id="tabPosBtn">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-label">POS Billing</span>
+      </button>
+      <button class="nav-tab" data-tab="orders" id="tabOrdersBtn">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Orders & Bills</span>
+        <span class="badge-count" id="todayOrdersCount">0</span>
+      </button>
+      <button class="nav-tab" data-tab="tables" id="tabTablesBtn">
+        <span class="nav-icon">🍽️</span>
+        <span class="nav-label">Tables</span>
+      </button>
+      <button class="nav-tab" data-tab="reports" id="tabReportsBtn">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Daily Sales</span>
+      </button>
+      <button class="nav-tab" data-tab="settings" id="tabSettingsBtn">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Printer & Setup</span>
+      </button>
+    </nav>
+
+    <!-- Header Right Actions & User Profile -->
+    <div class="header-right">
+      <div class="printer-quick-status" id="printerQuickStatus" title="RawBT Thermal Printer Status">
+        <span class="printer-dot"></span>
+        <span class="printer-label">RawBT 58mm</span>
+      </div>
+      <div class="clock-display" id="clockDisplay">12:00 PM</div>
+      <div class="user-chip" id="userProfileChip" title="Active Cashier">
+        <span class="user-avatar">AP</span>
+        <div class="user-info">
+          <span class="user-name" id="currentUserName">annampulao</span>
+          <span class="user-role">Cashier Tab</span>
+        </div>
+        <button class="lock-btn" id="lockAppBtn" title="Lock App Screen">🔒</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+    
+    <!-- ================= SECTION 1: POS BILLING ================= -->
+    <section class="tab-pane active" id="panePos">
+      <div class="pos-layout">
+        
+        <!-- Left: Menu & Catalog Selection -->
+        <div class="menu-column">
+          <!-- Top Filter Bar -->
+          <div class="menu-control-bar">
+            <!-- Search Input -->
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="menuSearchInput" placeholder="Search dish (Mutton, Pulao, Thali, सोलकडी...)" autocomplete="off">
+              <button class="clear-search-btn" id="clearSearchBtn">✕</button>
+            </div>
+
+            <!-- Diet Filter Switch -->
+            <div class="diet-toggles">
+              <button class="diet-btn active" data-diet="all">All</button>
+              <button class="diet-btn" data-diet="non-veg">
+                <span class="nv-box mini"><span class="nv-tri"></span></span> Non-Veg
+              </button>
+              <button class="diet-btn" data-diet="veg">
+                <span class="v-box mini"><span class="v-dot"></span></span> Veg
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Tabs -->
+          <div class="category-carousel" id="categoryCarousel">
+            <button class="cat-pill active" data-cat="all">
+              <span class="cat-emoji">🌟</span> All Items
+            </button>
+            <button class="cat-pill" data-cat="pulao">
+              <span class="cat-emoji">🍛</span> अन्नम पुलाव (Pulao)
+            </button>
+            <button class="cat-pill" data-cat="starters">
+              <span class="cat-emoji">🍗</span> फ्राय व सूप (Starters)
+            </button>
+            <button class="cat-pill" data-cat="thali">
+              <span class="cat-emoji">🍱</span> थाळी / Meals (11 AM - 2:30 PM)
+            </button>
+            <button class="cat-pill" data-cat="paratha">
+              <span class="cat-emoji">🫓</span> पराठा व पेय (Breads & Drinks)
+            </button>
+          </div>
+
+          <!-- Items Grid -->
+          <div class="items-grid" id="itemsGrid">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Right: Real-time Touch Cart & Billing Desk -->
+        <div class="cart-column">
+          <div class="cart-card">
+            <!-- Cart Header / Order Type -->
+            <div class="cart-header">
+              <div class="order-type-selector">
+                <button class="order-type-btn active" data-type="dine-in" id="typeDineInBtn">
+                  🍽️ Dine-In
+                </button>
+                <button class="order-type-btn" data-type="parcel" id="typeParcelBtn">
+                  🥡 Parcel
+                </button>
+                <button class="order-type-btn" data-type="quick" id="typeQuickBtn">
+                  ⚡ Quick
+                </button>
+              </div>
+
+              <!-- Table / Token Tag -->
+              <div class="table-token-badge">
+                <label for="tableSelectInput">Table / Token:</label>
+                <select id="tableSelectInput">
+                  <option value="T-1">Table 1</option>
+                  <option value="T-2">Table 2</option>
+                  <option value="T-3">Table 3</option>
+                  <option value="T-4">Table 4</option>
+                  <option value="T-5">Table 5</option>
+                  <option value="T-6">Table 6</option>
+                  <option value="T-7">Table 7</option>
+                  <option value="T-8">Table 8</option>
+                  <option value="Parcel-1">Parcel #1</option>
+                  <option value="Parcel-2">Parcel #2</option>
+                  <option value="Counter">Counter</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Customer Phone & WhatsApp bar -->
+            <div class="customer-input-row">
+              <div class="input-group phone-group">
+                <span class="prefix">🇮🇳 +91</span>
+                <input type="tel" id="customerPhoneInput" placeholder="WhatsApp Mobile No. (10 digits)" maxlength="10">
+              </div>
+              <input type="text" id="customerNameInput" class="name-input" placeholder="Customer Name (Optional)">
+            </div>
+
+            <!-- Items in Cart Table -->
+            <div class="cart-items-wrapper">
+              <div class="cart-table-head">
+                <span class="col-item">Item</span>
+                <span class="col-qty">Qty</span>
+                <span class="col-rate">Price</span>
+                <span class="col-total">Total</span>
+                <span class="col-del"></span>
+              </div>
+              <div class="cart-items-list" id="cartItemsList">
+                <!-- Cart items dynamically inserted here -->
+              </div>
+              <div class="cart-empty-state" id="cartEmptyState">
+                <div class="empty-icon">🍲</div>
+                <div class="empty-title">Cart is empty</div>
+                <div class="empty-desc">Tap on any dish from the menu to start billing</div>
+              </div>
+            </div>
+
+            <!-- Bill Totals Breakdown -->
+            <div class="cart-summary">
+              <div class="summary-line">
+                <span>Subtotal (<span id="cartTotalItemsCount">0</span> items)</span>
+                <span class="amount" id="subtotalAmount">₹0.00</span>
+              </div>
+              <div class="summary-line options-line">
+                <div class="parcel-checkbox-wrap">
+                  <label>
+                    <input type="checkbox" id="parcelChargeCheckbox">
+                    <span>Parcel Charge (+₹<span id="parcelChargeRate">15</span>)</span>
+                  </label>
+                </div>
+                <div class="discount-wrap">
+                  <span>Discount:</span>
+                  <input type="number" id="discountInput" placeholder="0" min="0" max="1000">
+                </div>
+              </div>
+              <div class="grand-total-banner">
+                <div class="gt-label">
+                  <span class="gt-title">GRAND TOTAL</span>
+                  <span class="gt-taxes">Inc. all taxes</span>
+                </div>
+                <div class="gt-amount" id="grandTotalAmount">₹0.00</div>
+              </div>
+            </div>
+
+            <!-- Payment Method Pills -->
+            <div class="payment-modes-grid">
+              <button class="pay-mode-btn active" data-mode="CASH" id="payCashBtn">
+                <span class="pm-icon">💵</span>
+                <span class="pm-title">CASH</span>
+              </button>
+              <button class="pay-mode-btn" data-mode="UPI" id="payUpiBtn">
+                <span class="pm-icon">📱</span>
+                <span class="pm-title">UPI / QR</span>
+              </button>
+              <button class="pay-mode-btn" data-mode="CARD" id="payCardBtn">
+                <span class="pm-icon">💳</span>
+                <span class="pm-title">CARD</span>
+              </button>
+              <button class="pay-mode-btn" data-mode="DUE" id="payDueBtn">
+                <span class="pm-icon">📝</span>
+                <span class="pm-title">DUE / KHATA</span>
+              </button>
+            </div>
+
+            <!-- Main Pos Action Buttons -->
+            <div class="cart-actions-panel">
+              <button class="action-btn btn-clear" id="clearCartBtn" title="Clear Bill">
+                🗑️ Clear
+              </button>
+
+              <button class="action-btn btn-kot" id="printKotBtn" title="Kitchen Order Ticket">
+                👨‍🍳 Print KOT
+              </button>
+
+              <button class="action-btn btn-whatsapp" id="sendWhatsappBtn" title="Send Bill to WhatsApp">
+                <span class="wa-icon">💬</span> WhatsApp
+              </button>
+
+              <button class="action-btn btn-rawbt" id="printRawbtBtn" title="Print to RawBT 58mm Thermal Printer">
+                <span class="rawbt-icon">🖨️</span> Print RawBT
+              </button>
+
+              <button class="action-btn btn-instant-all" id="printAndShareBtn" title="Print RawBT & Send WhatsApp in 1-Click">
+                <span class="flash-icon">⚡</span> 1-TAP SAVE & PRINT
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= SECTION 2: ORDERS & REPRINTS ================= -->
+    <section class="tab-pane" id="paneOrders">
+      <div class="orders-layout">
+        <div class="orders-header-bar">
+          <div class="orders-title-wrap">
+            <h2>Today's Bills & Invoices</h2>
+            <p>View, reprint to RawBT, or resend bill via WhatsApp</p>
+          </div>
+          <div class="orders-filter-tools">
+            <input type="text" id="orderSearchInput" placeholder="Search by Bill #, Phone, Table...">
+            <button class="btn-refresh" id="refreshOrdersBtn">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <div class="orders-table-wrapper">
+          <table class="orders-table" id="ordersTable">
+            <thead>
+              <tr>
+                <th>Bill #</th>
+                <th>Time</th>
+                <th>Type / Table</th>
+                <th>Customer</th>
+                <th>Items Summary</th>
+                <th>Amount</th>
+                <th>Payment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+          <div class="orders-empty" id="ordersEmpty">
+            <p>No orders yet today. Bills generated will appear here!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 3: TABLES OVERVIEW ================= -->
+    <section class="tab-pane" id="paneTables">
+      <div class="tables-layout">
+        <div class="tables-header-bar">
+          <div>
+            <h2>Floor & Table Status</h2>
+            <p>Live view of occupied dining tables and parcel queue</p>
+          </div>
+          <!-- Table Count Edit Toolbar -->
+          <div class="table-count-toolbar">
+            <span class="tct-label">Dining Tables:</span>
+            <div class="tct-stepper">
+              <button class="tct-step-btn" id="decreaseTableCountBtn" title="Decrease table count">−</button>
+              <input type="number" id="tableCountInput" value="8" min="1" max="50">
+              <button class="tct-step-btn" id="increaseTableCountBtn" title="Increase table count">+</button>
+            </div>
+            <button class="tct-apply-btn" id="applyTableCountBtn">Update Tables</button>
+          </div>
+          <div class="tables-legend">
+            <span class="legend-item"><span class="dot vacant"></span> Vacant</span>
+            <span class="legend-item"><span class="dot occupied"></span> Occupied</span>
+            <span class="legend-item"><span class="dot parcel"></span> Parcel</span>
+          </div>
+        </div>
+        <div class="tables-grid" id="tablesFloorGrid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 4: DAILY SALES REPORTS ================= -->
+    <section class="tab-pane" id="paneReports">
+      <div class="reports-layout">
+        <div class="reports-header-bar">
+          <div>
+            <h2>Daily Sales & Revenue Report</h2>
+            <p id="reportDateHeader">Today's Performance</p>
+          </div>
+          <button class="btn-print-report" id="printDaySummaryBtn">
+            🖨️ Print Day Summary (RawBT 58mm)
+          </button>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card gold">
+            <div class="metric-icon">💰</div>
+            <div class="metric-data">
+              <span class="metric-title">TOTAL REVENUE</span>
+              <span class="metric-value" id="repTotalSales">₹0.00</span>
+            </div>
+          </div>
+
+          <div class="metric-card green">
+            <div class="metric-icon">💵</div>
+            <div class="metric-data">
+              <span class="metric-title">CASH RECEIVED</span>
+              <span class="metric-value" id="repCashSales">₹0.00</span>
+            </div>
+          </div>
+
+          <div class="metric-card blue">
+            <div class="metric-icon">📱</div>
+            <div class="metric-data">
+              <span class="metric-title">UPI / ONLINE</span>
+              <span class="metric-value" id="repUpiSales">₹0.00</span>
+            </div>
+          </div>
+
+          <div class="metric-card purple">
+            <div class="metric-icon">🧾</div>
+            <div class="metric-data">
+              <span class="metric-title">TOTAL BILLS</span>
+              <span class="metric-value" id="repTotalBills">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-details-columns">
+          <div class="report-box">
+            <h3>🔥 Top Selling Dishes Today</h3>
+            <div class="top-dishes-list" id="topDishesList">
+              <p class="empty-note">No sales recorded yet today.</p>
+            </div>
+          </div>
+
+          <div class="report-box">
+            <h3>📑 Order Type Breakdown</h3>
+            <div class="order-type-stats" id="orderTypeStats">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SECTION 5: PRINTER & APP SETTINGS ================= -->
+    <section class="tab-pane" id="paneSettings">
+      <div class="settings-layout">
+        <div class="settings-card">
+          <h2>🖨️ RawBT Thermal Printer Configuration</h2>
+          <p class="settings-desc">Configure your handy 58mm / 2-inch thermal printer for 1-tap instant prints.</p>
+
+          <div class="form-row">
+            <label>Print Connection Mode:</label>
+            <div class="radio-cards-group">
+              <label class="radio-card">
+                <input type="radio" name="printerMode" value="rawbt-intent" checked id="pmIntent">
+                <div class="rc-content">
+                  <strong>RawBT App Intent (Recommended)</strong>
+                  <span>Directly calls Android RawBT app via URL scheme / Intent. 100% reliable on Tablets.</span>
+                </div>
+              </label>
+
+              <label class="radio-card">
+                <input type="radio" name="printerMode" value="rawbt-ws" id="pmWs">
+                <div class="rc-content">
+                  <strong>RawBT Background WebSocket</strong>
+                  <span>Prints silently to RawBT local service (ws://127.0.0.1:40213) without app switching.</span>
+                </div>
+              </label>
+
+              <label class="radio-card">
+                <input type="radio" name="printerMode" value="web-bluetooth" id="pmBt">
+                <div class="rc-content">
+                  <strong>Direct Web Bluetooth (ESC/POS)</strong>
+                  <span>Pairs directly with handy 58mm Bluetooth printer without any 3rd-party apps.</span>
+                </div>
+              </label>
+
+              <label class="radio-card">
+                <input type="radio" name="printerMode" value="browser" id="pmBrowser">
+                <div class="rc-content">
+                  <strong>Standard Browser Print</strong>
+                  <span>Opens standard print dialog formatted for 58mm thermal rolls.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="paperWidthSelect">Paper Size:</label>
+              <select id="paperWidthSelect">
+                <option value="58" selected>58mm (2-inch Handy Thermal Roll)</option>
+                <option value="80">80mm (3-inch Large POS Roll)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="printerFeedLines">Extra Paper Feed Lines (for easy tear):</label>
+              <select id="printerFeedLines">
+                <option value="2">2 lines</option>
+                <option value="4" selected>4 lines (Recommended)</option>
+                <option value="6">6 lines</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btn-cluster">
+            <button class="btn-secondary" id="testPrintRawbtBtn">
+              🖨️ Send Test Print to RawBT
+            </button>
+            <button class="btn-secondary" id="connectBtPrinterBtn">
+              📶 Pair Bluetooth Thermal Printer
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h2>🏪 Hotel & Billing Details</h2>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Hotel / Restaurant Name:</label>
+              <input type="text" id="cfgHotelName" value="ANNAM PULAO (अन्नम पुलाव)">
+            </div>
+            <div class="form-group">
+              <label>Caterer / Owner Name:</label>
+              <input type="text" id="cfgOwnerName" value="Vijaya Caterers Shital Bharate">
+            </div>
+            <div class="form-group">
+              <label>Phone / WhatsApp Number:</label>
+              <input type="text" id="cfgPhone" value="955 23 777 33">
+            </div>
+            <div class="form-group">
+              <label>UPI ID (For live QR on bill):</label>
+              <input type="text" id="cfgUpiId" value="9552377733@upi" placeholder="yourname@upi">
+            </div>
+            <div class="form-group">
+              <label>Total Dining Tables (T-1 to T-N):</label>
+              <input type="number" id="cfgTableCount" value="8" min="1" max="50">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Bill Footer Message:</label>
+            <input type="text" id="cfgFooterMsg" value="The Authentic Taste of Original Indian Spices..! 🙏 Visit Again!">
+          </div>
+
+          <div class="btn-cluster">
+            <button class="btn-primary" id="saveHotelConfigBtn">💾 Save Settings</button>
+            <button class="btn-danger" id="resetSalesDataBtn">⚠️ Reset Today's Demo Sales</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODALS & DIALOGS ================= -->
+
+  <!-- 1. LOGIN / LOCK SCREEN MODAL -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-logo-circle">🍛</div>
+        <h1 class="login-title">Annam Pulao</h1>
+        <div class="login-sub">अन्नम पुलाव • POS Tablet</div>
+      </div>
+      <p class="login-prompt">Enter username & PIN or tap Fast Login</p>
+      
+      <form id="loginForm" onsubmit="return false;">
+        <div class="login-inputs">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="loginUsername" value="annampulao" autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label>PIN / Password</label>
+            <input type="password" id="loginPin" value="1234" maxlength="8" placeholder="••••">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginSubmitBtn">
+          🚀 Login to Tab POS
+        </button>
+
+        <button type="button" class="btn-quick-login" id="quickLoginBtn">
+          ⚡ One-Touch Cashier Access
+        </button>
+      </form>
+
+      <div class="login-footer">
+        Vijaya Caterers Shital Bharate • 955 23 777 33
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 58mm THERMAL RECEIPT PREVIEW MODAL -->
+  <div class="modal-overlay" id="receiptPreviewModal">
+    <div class="receipt-modal-container">
+      <div class="receipt-modal-header">
+        <div class="rmh-title">
+          <span class="rmh-icon">🧾</span>
+          <span>58mm Handy Thermal Receipt Preview</span>
+        </div>
+        <button class="close-modal-btn" id="closeReceiptModalBtn">✕</button>
+      </div>
+
+      <div class="receipt-paper-roll-wrap">
+        <div class="receipt-paper-58mm" id="thermalReceiptPaper">
+          <!-- Formatted 58mm thermal receipt layout -->
+        </div>
+      </div>
+
+      <div class="receipt-modal-actions">
+        <button class="rm-btn rm-rawbt" id="rmPrintRawbtBtn">
+          <span class="icon">🖨️</span> Send to RawBT App
+        </button>
+        <button class="rm-btn rm-wa" id="rmSendWaBtn">
+          <span class="icon">💬</span> WhatsApp Customer
+        </button>
+        <button class="rm-btn rm-browser" id="rmPrintBrowserBtn">
+          <span class="icon">📄</span> Browser Print
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. UPI QR CODE MODAL FOR INSTANT CUSTOMER SCANNING -->
+  <div class="modal-overlay" id="upiQrModal">
+    <div class="upi-modal-card">
+      <div class="upi-header">
+        <div class="upi-brand-row">
+          <span class="upi-logo-badge">BHIM UPI</span>
+          <span>GPay / PhonePe / Paytm</span>
+        </div>
+        <button class="close-modal-btn" id="closeUpiModalBtn">✕</button>
+      </div>
+
+      <div class="upi-content">
+        <div class="upi-amount-title">Scan to Pay</div>
+        <div class="upi-amount-val" id="upiModalAmount">₹0.00</div>
+        <div class="upi-qr-wrapper" id="upiQrWrapper">
+          <img id="upiQrImage" src="" alt="UPI QR Code">
+        </div>
+        <div class="upi-id-tag" id="upiModalIdTag">9552377733@upi</div>
+        <p class="upi-note">Show this to customer on tab screen. Payment will be received instantly.</p>
+      </div>
+
+      <div class="upi-footer-actions">
+        <button class="btn-primary" id="confirmUpiReceivedBtn">
+          ✅ Payment Received & Print Bill
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. TOAST NOTIFICATION -->
+  <div class="toast-notification" id="toastNotice">
+    <span class="toast-icon" id="toastIcon">✨</span>
+    <span class="toast-msg" id="toastMsg">Action completed successfully</span>
+  </div>
+
+  <!-- Hidden Iframe & Intent Anchor for RawBT triggering -->
+  <a id="rawbtIntentLink" style="display:none;" href="#"></a>
+
+  <!-- Audio Tone Synthesizer & Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
