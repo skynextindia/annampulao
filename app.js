@@ -759,21 +759,23 @@ function generate58mmReceiptHTML(order) {
 
   let itemsRows = '';
   order.items.forEach(item => {
-    // Format for 58mm (approx 32 chars width)
     if (isKOT) {
       itemsRows += `
         <tr>
-          <td style="font-weight:700;">${item.name_en}</td>
-          <td style="text-align:right; font-size:13px; font-weight:800;">${item.qty}</td>
+          <td style="font-weight:700; word-break:break-word;">${item.name_en}</td>
+          <td style="text-align:right; font-size:12px; font-weight:800;">${item.qty}</td>
         </tr>
         <tr>
-          <td colspan="2" style="font-size:9px; color:#555; padding-bottom:4px;">${item.name_mr}</td>
+          <td colspan="2" style="font-size:9.5px; color:#555; padding-bottom:3px; word-break:break-word;">${item.name_mr}</td>
         </tr>
       `;
     } else {
       itemsRows += `
         <tr>
-          <td>${item.name_en}</td>
+          <td style="word-break:break-word; font-weight:600;">
+            ${item.name_en}
+            ${item.name_mr ? `<div style="font-size:9px; color:#444;">${item.name_mr}</div>` : ''}
+          </td>
           <td style="text-align:center;">${item.qty}</td>
           <td style="text-align:right;">${item.price}</td>
           <td style="text-align:right; font-weight:700;">${item.price * item.qty}</td>
@@ -784,18 +786,22 @@ function generate58mmReceiptHTML(order) {
 
   if (isKOT) {
     return `
-      <div class="r-center r-bold r-big">*** KITCHEN TICKET (KOT) ***</div>
-      <div class="r-center r-bold">${cfg.hotelName}</div>
+      <div class="r-center r-bold r-hotel">*** KITCHEN ORDER TICKET ***</div>
+      <div class="r-center r-bold r-owner">${cfg.hotelName}</div>
       <div class="r-divider"></div>
       <div class="r-row"><span>Token/Table:</span><span class="r-bold">${order.tableNumber}</span></div>
       <div class="r-row"><span>Bill No:</span><span>${order.billNo}</span></div>
       <div class="r-row"><span>Time:</span><span>${order.timeStr}</span></div>
-      <div class="r-row"><span>Type:</span><span class="r-bold">${order.orderType.toUpperCase()}</span></div>
+      <div class="r-row"><span>Order Type:</span><span class="r-bold">${order.orderType.toUpperCase()}</span></div>
       <div class="r-double-divider"></div>
       <table class="r-table">
+        <colgroup>
+          <col style="width: 75%;">
+          <col style="width: 25%;">
+        </colgroup>
         <thead>
           <tr>
-            <th>ITEM NAME</th>
+            <th style="text-align:left;">DISH NAME</th>
             <th style="text-align:right;">QTY</th>
           </tr>
         </thead>
@@ -806,30 +812,37 @@ function generate58mmReceiptHTML(order) {
       <div class="r-double-divider"></div>
       <div class="r-center r-bold">Total Items: ${order.totalItems}</div>
       <div class="r-divider"></div>
-      <div class="r-center" style="font-size:9px;">Order Prepared By Chef</div>
+      <div class="r-center r-subfooter">Order Sent to Kitchen</div>
     `;
   }
 
   return `
-    <div class="r-center r-bold r-big">${cfg.hotelName}</div>
-    <div class="r-center" style="font-size:10px;">${cfg.ownerName}</div>
-    <div class="r-center r-bold" style="font-size:11px;">Ph: ${cfg.phone}</div>
-    <div class="r-center" style="font-size:9px; margin-top:2px;">THE AUTHENTIC TASTE OF INDIAN SPICES</div>
+    <div class="r-center r-bold r-hotel">${cfg.hotelName}</div>
+    <div class="r-center r-owner">${cfg.ownerName}</div>
+    <div class="r-center r-bold r-phone">Mob: ${cfg.phone}</div>
+    <div class="r-center r-tagline">AUTHENTIC INDIAN SPICES</div>
     <div class="r-divider"></div>
 
     <div class="r-row"><span>Bill No:</span><span class="r-bold">${order.billNo}</span></div>
     <div class="r-row"><span>Date & Time:</span><span>${order.timeStr}</span></div>
     <div class="r-row"><span>Table / Type:</span><span class="r-bold">${order.tableNumber} (${order.orderType})</span></div>
-    ${order.customerPhone ? `<div class="r-row"><span>Customer:</span><span>+91 ${order.customerPhone}</span></div>` : ''}
+    <div class="r-row"><span>Customer Mob:</span><span class="r-bold">+91 ${order.customerPhone}</span></div>
+    ${order.customerName ? `<div class="r-row"><span>Customer Name:</span><span>${order.customerName}</span></div>` : ''}
     <div class="r-double-divider"></div>
 
     <table class="r-table">
+      <colgroup>
+        <col style="width: 46%;">
+        <col style="width: 14%;">
+        <col style="width: 18%;">
+        <col style="width: 22%;">
+      </colgroup>
       <thead>
         <tr>
-          <th>ITEM</th>
+          <th style="text-align:left;">ITEM</th>
           <th style="text-align:center;">QTY</th>
           <th style="text-align:right;">RATE</th>
-          <th style="text-align:right;">AMT</th>
+          <th style="text-align:right;">TOTAL</th>
         </tr>
       </thead>
       <tbody>
@@ -843,15 +856,15 @@ function generate58mmReceiptHTML(order) {
     ${order.discount > 0 ? `<div class="r-row"><span>Discount:</span><span>-₹${order.discount.toFixed(2)}</span></div>` : ''}
     <div class="r-divider"></div>
 
-    <div class="r-row r-bold r-big" style="font-size:14px; margin: 4px 0;">
+    <div class="r-row r-bold r-grand-total">
       <span>GRAND TOTAL:</span>
       <span>₹${order.grandTotal.toFixed(2)}</span>
     </div>
     <div class="r-row"><span>Payment Mode:</span><span class="r-bold">${order.paymentMode}</span></div>
     <div class="r-divider"></div>
 
-    <div class="r-center r-bold" style="font-size:10px; margin-top:4px;">${cfg.footerMsg}</div>
-    <div class="r-center" style="font-size:9px; margin-top:2px;">Designed for Fast Tablet Billing</div>
+    <div class="r-center r-bold r-footer">${cfg.footerMsg}</div>
+    <div class="r-center r-subfooter">*** THANK YOU VISIT AGAIN ***</div>
   `;
 }
 
@@ -888,7 +901,10 @@ function buildRawbtTextPayload(order) {
   lines.push(leftRight(`Bill: ${order.billNo}`, order.timeStr.slice(0, 11)));
   lines.push(leftRight(`Table: ${order.tableNumber}`, `Type: ${order.orderType}`));
   if (order.customerPhone) {
-    lines.push(leftRight('Cust: +91 ' + order.customerPhone, ''));
+    lines.push(leftRight('Customer Mob:', '+91 ' + order.customerPhone));
+  }
+  if (order.customerName) {
+    lines.push(leftRight('Customer Name:', order.customerName.slice(0, 16)));
   }
   lines.push(divider('='));
 
@@ -1103,11 +1119,41 @@ function sendWhatsAppBill(order) {
   }
 }
 
+// ================= MANDATORY CUSTOMER PHONE VALIDATOR =================
+function validateCustomerPhone() {
+  const raw = (DOM.customerPhoneInput.value || '').replace(/[^0-9]/g, '').trim();
+  if (raw.length !== 10) {
+    AudioFX.tap();
+    const phoneGroup = document.getElementById('phoneGroup') || DOM.customerPhoneInput;
+    phoneGroup.classList.add('error');
+    DOM.customerPhoneInput.focus();
+    showToast('Customer 10-digit mobile number is mandatory!', '⚠️');
+    setTimeout(() => phoneGroup.classList.remove('error'), 3000);
+
+    // If cashier is on mobile menu tab, auto-switch to cart tab so they can type phone
+    if (AppState.mobilePosView === 'menu' && typeof setMobilePosView === 'function') {
+      setMobilePosView('cart');
+      setTimeout(() => DOM.customerPhoneInput.focus(), 250);
+    }
+    return null;
+  }
+  return raw;
+}
+
 // ================= CREATE & COMMIT ORDER =================
 function commitCurrentOrder(paymentModeOverride = null, isKOT = false) {
   if (AppState.cart.length === 0) {
     showToast('Cart is empty! Add items first.', '⚠️');
     return null;
+  }
+
+  // Enforce mandatory customer mobile number for bills
+  let validPhone = '';
+  if (!isKOT) {
+    validPhone = validateCustomerPhone();
+    if (!validPhone) return null;
+  } else {
+    validPhone = (DOM.customerPhoneInput.value || '').replace(/[^0-9]/g, '').trim();
   }
 
   const totals = calculateCartTotals();
@@ -1124,7 +1170,7 @@ function commitCurrentOrder(paymentModeOverride = null, isKOT = false) {
     timestamp: now.getTime(),
     orderType: AppState.orderType,
     tableNumber: DOM.tableSelectInput.value,
-    customerPhone: DOM.customerPhoneInput.value.trim(),
+    customerPhone: validPhone,
     customerName: DOM.customerNameInput.value.trim(),
     items: JSON.parse(JSON.stringify(AppState.cart)),
     subtotal: totals.subtotal,
@@ -1701,14 +1747,22 @@ function initEventListeners() {
       btn.classList.add('active');
       AppState.paymentMode = btn.getAttribute('data-mode');
 
-      // If user chooses UPI, open the QR modal automatically for ease of collection!
+      // If user chooses UPI, validate phone first then open QR modal
       if (AppState.paymentMode === 'UPI') {
         const totals = calculateCartTotals();
         if (totals.grandTotal > 0) {
+          const validPhone = validateCustomerPhone();
+          if (!validPhone) return;
           openUpiQrModal(totals.grandTotal);
         }
       }
     });
+  });
+
+  // Clear phone validation error when typing
+  DOM.customerPhoneInput.addEventListener('input', () => {
+    const phoneGroup = document.getElementById('phoneGroup') || DOM.customerPhoneInput;
+    phoneGroup.classList.remove('error');
   });
 
   // Main Action Buttons

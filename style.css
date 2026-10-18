@@ -729,6 +729,29 @@ body {
 
 .phone-group input:focus, .name-input:focus { outline: none; }
 
+.phone-group.error {
+  border-color: var(--color-red) !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.25) !important;
+  animation: shakePhone 0.35s ease;
+}
+
+@keyframes shakePhone {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.required-badge {
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--color-red);
+  background: var(--color-red-light);
+  padding: 1px 4px;
+  border-radius: 2px;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
 .name-input {
   flex: 1;
   height: 28px;
@@ -1499,18 +1522,20 @@ body {
 
 /* 58mm Thermal Receipt Modal */
 .receipt-modal-container {
-  width: 320px;
+  width: 340px;
+  max-width: 95vw;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   background: #ffffff;
   border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
   overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .receipt-modal-header {
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: #f8fafc;
   display: flex;
   justify-content: space-between;
@@ -1521,52 +1546,135 @@ body {
 .rmh-title {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-main);
 }
 
-.close-modal-btn {
-  background: none;
-  border: none;
-  color: var(--text-light);
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.close-modal-btn:hover { color: var(--color-red); }
-
 .receipt-paper-roll-wrap {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
-  background: #f1f5f9;
+  padding: 16px 12px;
+  background: #e2e8f0;
   display: flex;
   justify-content: center;
 }
 
 .receipt-paper-58mm {
-  width: 260px;
+  width: 270px;
+  max-width: 100%;
+  box-sizing: border-box;
   background: #ffffff;
   color: #000000;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1.3;
-  padding: 12px 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.35;
+  padding: 14px 10px;
   border-top: 2px dashed #94a3b8;
   border-bottom: 2px dashed #94a3b8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
 }
 
-.receipt-paper-58mm .r-center { text-align: center; }
-.receipt-paper-58mm .r-bold { font-weight: 700; }
-.receipt-paper-58mm .r-big { font-size: 12px; }
-.receipt-paper-58mm .r-divider { border-top: 1px dashed #000; margin: 4px 0; }
-.receipt-paper-58mm .r-double-divider { border-top: 1.5px solid #000; margin: 4px 0; }
-.receipt-paper-58mm .r-row { display: flex; justify-content: space-between; }
-.receipt-paper-58mm .r-table { width: 100%; margin: 3px 0; }
-.receipt-paper-58mm .r-table th { text-align: left; border-bottom: 1px dashed #000; font-size: 9px; }
-.receipt-paper-58mm .r-table td { padding: 1.5px 0; font-size: 9.5px; }
+.receipt-paper-58mm .r-center {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.receipt-paper-58mm .r-bold {
+  font-weight: 800;
+}
+
+.receipt-paper-58mm .r-hotel {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  color: #000;
+}
+
+.receipt-paper-58mm .r-owner {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #222;
+  margin-top: 1px;
+}
+
+.receipt-paper-58mm .r-phone {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.receipt-paper-58mm .r-tagline {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #444;
+  margin-top: 2px;
+}
+
+.receipt-paper-58mm .r-divider {
+  border-top: 1px dashed #000000;
+  margin: 5px 0;
+}
+
+.receipt-paper-58mm .r-double-divider {
+  border-top: 1.5px solid #000000;
+  margin: 5px 0;
+}
+
+.receipt-paper-58mm .r-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 10.5px;
+  margin: 1.5px 0;
+}
+
+.receipt-paper-58mm .r-grand-total {
+  font-size: 14px;
+  margin: 4px 0;
+  color: #000;
+}
+
+.receipt-paper-58mm .r-footer {
+  font-size: 10px;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.receipt-paper-58mm .r-subfooter {
+  font-size: 9px;
+  color: #333;
+  margin-top: 2px;
+  letter-spacing: 0.5px;
+}
+
+.receipt-paper-58mm .r-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  margin: 4px 0 !important;
+  box-sizing: border-box !important;
+}
+
+.receipt-paper-58mm .r-table th {
+  text-align: left;
+  border-bottom: 1px dashed #000000;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 3px 0;
+}
+
+.receipt-paper-58mm .r-table td {
+  padding: 2.5px 0;
+  font-size: 10.5px;
+  overflow: hidden;
+  word-break: break-word;
+  white-space: normal;
+  vertical-align: top;
+}
 
 .receipt-modal-actions {
   padding: 8px 10px;
@@ -2207,14 +2315,74 @@ body {
   }
 }
 
-/* ================= 58MM PRINT CSS ================= */
+/* ================= 58MM THERMAL PRINT CSS ================= */
 @media print {
-  @page { size: 58mm auto; margin: 0; }
-  body * { visibility: hidden; }
-  #thermalReceiptPaper, #thermalReceiptPaper * { visibility: visible; }
+  @page {
+    size: 58mm auto;
+    margin: 0mm !important;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box !important;
+  }
+
+  html, body {
+    width: 58mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #thermalReceiptPaper, #thermalReceiptPaper * {
+    visibility: visible !important;
+  }
+
   #thermalReceiptPaper {
-    position: absolute; left: 0; top: 0; width: 58mm !important;
-    padding: 1.5mm !important; margin: 0 !important; border: none !important;
-    font-size: 8.5pt !important; color: #000 !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    margin: 0 auto !important; /* Perfect physical centering on 58mm paper roll */
+    width: 48mm !important; /* Exact printable width of 58mm thermal head */
+    max-width: 48mm !important;
+    padding: 2mm 1mm !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 8pt !important;
+    line-height: 1.25 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  #thermalReceiptPaper .r-hotel {
+    font-size: 11pt !important;
+    font-weight: 800 !important;
+  }
+
+  #thermalReceiptPaper .r-grand-total {
+    font-size: 10pt !important;
+    font-weight: 800 !important;
+  }
+
+  #thermalReceiptPaper .r-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    margin: 3px 0 !important;
+  }
+
+  #thermalReceiptPaper .r-table th,
+  #thermalReceiptPaper .r-table td {
+    font-size: 7.5pt !important;
+    padding: 1.5px 0 !important;
+    word-break: break-word !important;
   }
 }

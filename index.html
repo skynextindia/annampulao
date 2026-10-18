@@ -184,11 +184,12 @@
               </div>
             </div>
 
-            <!-- Customer Phone & WhatsApp bar -->
+            <!-- Customer Phone & WhatsApp bar (Mandatory for Billing) -->
             <div class="customer-input-row">
-              <div class="input-group phone-group">
+              <div class="input-group phone-group" id="phoneGroup">
                 <span class="prefix">🇮🇳 +91</span>
-                <input type="tel" id="customerPhoneInput" placeholder="WhatsApp Mobile No. (10 digits)" maxlength="10">
+                <input type="tel" id="customerPhoneInput" placeholder="Mobile Number (10 Digits) *" maxlength="10" required autocomplete="tel">
+                <span class="required-badge">* Required</span>
               </div>
               <input type="text" id="customerNameInput" class="name-input" placeholder="Customer Name (Optional)">
             </div>
